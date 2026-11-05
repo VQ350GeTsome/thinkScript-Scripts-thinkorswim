@@ -1,0 +1,13 @@
+input length = 62; #Hint length: Lookback window.
+input price = hlc3; #Hint price: Price to use.
+input use_volume = yes; #Hint use_volume: Use Volume in weighting too (Recommended).
+
+# Use Realized Volatility if IV is not avaliable.
+def rv = StDev(Log(close / close[1]), length) * Sqrt(252);
+def volatility = if isNaN(imp_volatility()) then rv else imp_volatility();
+def vol = if isNaN(volume) then 1 else volume;
+
+def weighting = if use_volume then volatility * vol else volatility;
+plot market_Memory = sum(price * weighting, length) / sum(weighting, length);
+market_Memory.setDefaultColor(createColor(050, 150, 250));
+market_Memory.hideBubble();
