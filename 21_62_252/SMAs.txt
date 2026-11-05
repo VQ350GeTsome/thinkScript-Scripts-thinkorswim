@@ -1,0 +1,24 @@
+# Constants ...
+def p = hlc3;
+def t = averageType.SIMPLE;
+
+# 21
+plot s = movingAverage(t, p, 21);
+s.setDefaultColor(createColor(025, 150, 025)); 
+s.setLineWeight(1); 
+s.setStyle(Curve.FIRM);
+s.hideBubble(); 
+
+# 62
+plot m = movingAverage(t, p, 62);
+m.setDefaultColor(createColor(255, 175, 050));
+m.setLineWeight(1);
+m.setStyle(Curve.FIRM);
+m.hideBubble();
+
+# 252
+plot l = movingAverage(t, p, 252);
+l.setDefaultColor(createColor(255, 100, 100));
+l.setLineWeight(1);
+l.setStyle(Curve.FIRM);
+l.hideBubble();

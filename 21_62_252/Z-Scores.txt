@@ -1,0 +1,51 @@
+declare lower;
+
+# Contants ...
+def price = hlc3;
+def type = AverageType.SIMPLE;
+def p = price;
+def t = type;
+
+# 21
+def s_a = MovingAverage(t, p, 21);
+def s_s = StDev(p, 21);
+plot s = (p - s_a) / s_s;
+s.SetDefaultColor(CreateColor(025, 150, 025));
+s.SetLineWeight(1);
+s.SetStyle(Curve.FIRM);
+s.HideBubble();
+
+# 62
+def m_a = MovingAverage(t, p, 62);
+def m_s = StDev(p, 62);
+plot m = (p - m_a) / m_s;
+m.SetDefaultColor(CreateColor(255, 175, 050));
+m.SetLineWeight(1);
+m.SetStyle(Curve.FIRM);
+m.HideBubble();
+
+# 252
+def l_a = MovingAverage(t, p, 252);
+def l_s = StDev(p, 252);
+plot l = (p - l_a) / l_s;
+l.SetDefaultColor(CreateColor(255, 100, 100));
+l.SetLineWeight(1);
+l.SetStyle(Curve.FIRM);
+l.HideBubble();
+
+# Zero line
+plot zero =  0;
+zero.SetDefaultColor(Color.BLACK);
+zero.SetStyle(Curve.MEDIUM_DASH);
+
+# Bollinger Bands
+input bollinger = yes; #Hint bollinger: Show where the bollinger bands are. { 2 , -2 }
+input bollinger_std = 2; #Hint bollinger_std: Standard Deviations to use for the bands. 2 is usual.
+
+# Top Band
+plot b_t = if bollinger then bollinger_std else Double.NaN; 
+b_t.setDefaultColor(createColor(050,150,250));
+
+# Bottom Band
+plot b_b = if bollinger then -bollinger_std else Double.NaN;
+b_b.setDefaultColor(createColor(050,150,250));
