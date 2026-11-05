@@ -1,0 +1,57 @@
+declare upper;
+
+input lookback_days = 31; #Hint lookback: Lookback window in calendar days.
+input sig = 1; #Hint sig: Amount of Standard Deviations.
+input show_mid = no;  #Hint show_mid: Show the middle of the bands. Also known as what the price was lookback_days ago.
+
+# Adjust lookback to trading days ...
+def lookback = RoundUp(252 * (lookback_days / 365));
+
+def rv = StDev(Log(close / close[1]), lookback) * Sqrt(252);
+
+def priceback = close[lookback];
+
+# Get Volatility, if implied volatility doesn't exist fall back on realized volatility.
+def vol0 = if IsNaN(imp_volatility()) then rv else imp_volatility();
+def vol = vol0[lookback];
+
+def move = priceback * vol * Sqrt(lookback / 252) * sig;
+
+plot upper = priceback + move;
+plot mid = if show_mid then priceback else Double.NaN;
+plot lower = priceback - move;
+
+upper.SetDefaultColor(CreateColor(190, 190, 190));
+mid.setDefaultColor(CreateColor(190,190,190));
+lower.SetDefaultColor(CreateColor(190, 190, 190));
+
+upper.HideBubble();
+mid.hideBubble();
+lower.HideBubble();
+
+AddCloud(upper, lower, CreateColor(245, 245, 245), Color.RED);
+
+# Above & Below %'s ...
+
+input show_chance = yes; #Hint show_chance: Assumes a normal distribution centered on the price today.
+input strike = 100; #Hint strike: The strike, or price, used to calculate the chance above or below.
+
+def one_sig = priceback * vol * Sqrt(lookback / 252); 
+def strike_z = if one_sig == 0 then 0 else (strike - close) / one_sig;
+
+# Coefficients to aproximate the CDF:
+def p  = 0.3275911;
+def a1 = 0.254829592;
+def a2 = -0.284496736;
+def a3 = 1.421413741;
+def a4 = -1.453152027;
+def a5 = 1.061405429;
+
+def x = AbsValue(strike_z) / Sqrt(2);
+def t = 1 / (1 + p * x);
+def erf = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Exp(-x * x);
+
+def sign = if strike_z < 0 then -1 else 1;
+def prob_below = 100*(0.5 * (1 + sign * erf));
+
+AddLabel(show_chance, "Forecast Chance Above: " + round(100-prob_below, 1) + "% Chance Below: " + round(prob_below,1) + "%", Color.BLACK, Location.TOP_LEFT);

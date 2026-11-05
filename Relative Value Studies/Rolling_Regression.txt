@@ -1,0 +1,73 @@
+declare upper;
+
+# Regression Settings ...
+input symbol = "SPX"; #Hint symbol: Other stock, ETF, futures contract, index, or whatever to use to predict the fair value.
+input window = 252; #Hint window: Lookback window for data. Recommended to be above 252 (1 Trading Year).
+
+# Predicted Value Line Settings ...
+input show_line = yes; #Hint show_line: Show history of predicted values.
+input show_extrapolation = no; #Hint show_extrapolation: Change the color of the predicted value line to show when the model is extrapolating versus interpolating.
+
+# Label Settings ...
+input show_predicted_price = yes; #Hint show_predicted_price: Creates a Label to display the Predicted Price.
+input show_correlation = yes; #Hint show_correlation: Creates a Label to display Correlation.
+input show_premium_discount = yes; #Hint show_premium_discount: Creates a Label to display the premium or discount compared to the predicted fair value.
+input show_beta = yes; #Hint show_beta: Creates a Label to display the Beta.
+
+# Make sure the period is at least a DAY.
+def p = if GetAggregationPeriod() < AggregationPeriod.DAY then AggregationPeriod.DAY else GetAggregationPeriod();
+
+def x = close(symbol = symbol, period = p);
+def y = close(period = p);
+
+def xmean = Average(x, window);
+def ymean = Average(y, window);
+
+def xdist = x - xmean;
+def ydist = y - ymean;
+
+def cov0 = (
+    fold i0 = 0 to window with n0 = 0 do
+        n0 + ((x[i0] - xmean) * (y[i0] - ymean))
+);
+
+def cov = (cov0) / (window - 1);
+
+def xdistsumsqr = (
+    fold i1 = 0 to window with n1 = 0 do
+        n1 + ((x[i1] - xmean) * (x[i1] - xmean))
+);
+def ydistsumsqr = (
+    fold i2 = 0 to window with n2 = 0 do
+        n2 + ((y[i2] - ymean) * (y[i2] - ymean))
+);
+def xvar = xdistsumsqr / (window - 1);
+def yvar = ydistsumsqr / (window - 1);
+
+def xstd = Sqrt(xvar);
+def ystd = Sqrt(yvar);
+
+def corcoeff = cov / (xstd * ystd);
+def beta = ystd / xstd;
+def m = corcoeff * beta;
+def b = ymean - (xmean * m);
+
+def pred = m * x + b;
+plot pred_plot = if show_line then pred else Double.NaN;
+pred_plot.HideBubble();
+
+# Extrapolation or Interpolation ?
+def xmax = Highest(x, window);
+def xmin = Lowest(x, window);
+def interpolation = xmin[1] <= x and x <= xmax[1];
+pred_plot.AssignValueColor(if interpolation or !show_extrapolation then CreateColor(050, 150, 250) else CreateColor(250, 150, 050));
+
+# Labels ...
+AddLabel(show_predicted_price, "Predicted Price: $" + Round(pred, 2), Color.BLACK, Location.TOP_LEFT);
+AddLabel(show_correlation, "Correlation: " + Round((AbsValue(corcoeff) * 100), 2) + "%", Color.BLACK, Location.TOP_LEFT);
+AddLabel(show_premium_discount, 
+    (if close > pred then "Premium: " else "Discount: ") + 
+        Round(100 * ((close / pred) - 1), 2) + "%",
+Color.BLACK, Location.TOP_LEFT
+);
+AddLabel(show_beta, "Beta: " + Round((ystd / y) / (xstd / x), 3), Color.BLACK, Location.TOP_LEFT);
