@@ -1,0 +1,132 @@
+declare lower;
+
+script stretch {
+    input v = 0;
+    plot value = Sin((3.141592 / 2) * (v));
+}
+
+script stochastic {
+    input v = 1;
+    input l = 1;
+    plot sto = (v - Lowest(v, l)) / (Highest(v, l) - Lowest(v, l));
+}
+
+script sto {
+    input l = 1;
+    def s = (close - Lowest(low, l)) / (Highest(high, l) - Lowest(low, l));
+    plot d = 2 * (s - 0.50);
+}
+
+# User Inputs
+input length = 21;
+input show_all = no;
+input composite_type = { default "Harrison Weighted", "Summation" };
+input show_channel = no;
+input price_color = no;
+
+# Constants
+def price = hlc3;
+def nan = Double.NaN;
+
+# Reused values for indicators
+def change = price - price[1];
+def avg = Average(price, length);
+
+# Relative Strength Index
+def rsi = Average(change, length) / Average(AbsValue(change), length);
+# Money Flow Index ( Volume Weighted RSI )
+def mfi = WMA(change, length) / WMA(AbsValue(change), length);
+# Stochastic
+def sto = sto(length);
+def stl = sto(length * 6);
+# Ultimate Oscillator
+def bp = close - Min(low, close[1]);
+def tr = Max(high, close[1]) - Min(low, close[1]);
+def a1 = Sum(bp, length / 2) / Sum(tr, length / 2);
+def a2 = Sum(bp, length) / Sum(tr, length);
+def a3 = Sum(bp, length * 3) / Sum(tr, length * 3);
+def ulo = 2 * (((4 * a1 + 2 * a2 + a3) / 7) - 0.50);
+# Relative Vigor Index
+def c_o = close - open;
+def h_l = high - low;
+    # 1 2 2 1 ( 4 / regular length )
+def num1 = c_o + 2 * c_o[1] + 2 * c_o[2] + c_o[3];
+def den1 = h_l + 2 * h_l[1] + 2 * h_l[2] + h_l[3];
+def rvi = num1 / den1;
+# Z-Score ( 1.0 : 3.0sig )
+def d = price - avg;
+def std = Sqrt(Average(d * d, length * 2));
+def zsr = (d / std) / 3.0;
+# Commodity Channel Index
+def mean_deviation = Average(AbsValue(price - avg), length);
+def cci = (price - avg) / (mean_deviation * 4.00);
+# Triple Averaged Exponetial
+def el = ceil(length / 3);
+def e1 = expAverage(price, el);
+def e2 = expAverage(e1, el);
+def e3 = expAverage(e2, el);
+def trx = (e3 / e3[1] - 1)*100; 
+# Chande Momentum Oscillator
+def up = if change > 0 then change else 0;
+def down = if change > 0 then 0 else -change;
+def s_up = sum(up,length);
+def s_down = sum(down,length);
+def cmo = (s_up - s_down) / (s_up + s_down);
+# Detrended Price Oscillator
+def dpo = 5*(price / avg - 1);
+# Utilities Regime
+def util_p = hlc3(symbol = "XLU");
+def regime_ratio = price / util_p;
+def mean_rr = average(regime_ratio, length * 3);
+def dist_rr = regime_ratio - mean_rr;
+def std_rr = stDev(regime_ratio, length * 3);
+def urg = (dist_rr / std_rr) / 3.0;
+
+# Composites
+def comp;
+switch (composite_type) {
+    # Equal Weighted
+case "Summation":
+    comp = rsi + mfi + sto + stl + ulo + 
+           rvi + zsr + cci + trx + cmo + 
+           dpo + urg;
+    # Personally Weighted
+case "Harrison Weighted":
+    comp = (
+            rsi * 10 + mfi * 10 + # (20%) RSI
+            sto * 05 + stl * 15 + # (20%) Stochastic
+            zsr * 05 + rvi * 05 + # (10%) Faster moving
+            trx * 05 + ulo * 15 + # (20%) Multi-sampling 
+            cmo * 10 + cci * 05 + # (15%) Misc
+            urg * 15 +            # (15%) Other symbol samples
+          0) / 11;
+}
+;
+
+# Plots
+plot comp_p = if show_all then nan else comp;
+comp_p.SetDefaultColor(CreateColor(050, 150, 250));
+
+def chnl = if show_channel then Average(AbsValue(comp), 252) else nan;
+plot upper = + chnl;
+plot lower = - chnl;
+upper.SetDefaultColor(Color.BLACK);
+lower.SetDefaultColor(Color.BLACK);
+
+# Each individual plot
+plot rsi_p = if show_all then rsi else nan;
+plot mfi_p = if show_all then mfi else nan;
+plot sto_p = if show_all then sto else nan;
+plot stl_p = if show_all then stl else nan;
+plot ulo_p = if show_all then ulo else nan;
+plot rvi_p = if show_all then rvi else nan;
+plot zsr_p = if show_all then zsr else nan;
+plot cci_p = if show_all then cci else nan;
+plot trx_p = if show_all then trx else nan;
+plot dpo_p = if show_all then dpo else nan;
+plot urg_p = if show_all then urg else nan;
+
+# Zero line
+plot zero =  0;
+zero.SetDefaultColor(Color.BLACK);
+zero.SetStyle(Curve.MEDIUM_DASH);
