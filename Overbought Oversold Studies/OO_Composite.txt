@@ -18,11 +18,10 @@ script sto {
 }
 
 # User Inputs
-input length = 21;
-input show_all = no;
-input composite_type = { default "Harrison Weighted", "Summation" };
-input show_channel = no;
-input price_color = no;
+input length = 21; #Hint length: Looback window for the oversold / overbought.
+input show_all = no; #Hint show_all: If yes then the study will show every subindicator.
+input composite_type = { default "Harrison Weighted", "Summation" }; #Hint composite_type: Harrison Weighted is my custom weights. Summation is equal weight.
+input show_channel = no; #Hint show_channel: Plots a channel that can be used for signals.
 
 # Constants
 def price = hlc3;

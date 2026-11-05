@@ -1,0 +1,31 @@
+declare upper;
+#Hint: Levels To Keep Watch Of
+
+input period = aggregationPeriod.OPT_EXP; #Hint period: Period to generate levels for.
+
+# Get Open and the average range.
+def c = open (period = period)[0];
+def a = average(absValue(high(period = period) - low(period = period)),12) / 2;
+
+# Plot Levels 
+plot c4 = c + (a * 4); plot c3 = c + (a * 3);
+plot c2 = c + (a * 2); plot c1 = c + (a * 1);
+plot b0 = c;
+plot p1 = c - (a * 1); plot p2 = c - (a * 2);
+plot p3 = c - (a * 3); plot p4 = c - (a * 4);
+
+# Vanity ...
+
+def r = 150;
+defineGlobalColor("c", createColor(r,r,r));
+
+c4.setDefaultColor(globalColor("c")); c3.setDefaultColor(globalColor("c")); c2.setDefaultColor(globalColor("c")); c1.setDefaultColor(globalColor("c"));
+c4.setLineWeight(1); c3.setLineWeight(1); c2.setLineWeight(1); c1.setLineWeight(1);
+b0.setDefaultColor(Color.BLACK); b0.setLineWeight(2); b0.setPaintingStrategy(PaintingStrategy.HORIZONTAL);
+p4.setLineWeight(1); p3.setLineWeight(1); p2.setLineWeight(1); p1.setLineWeight(1);
+p4.setDefaultColor(globalColor("c")); p3.setDefaultColor(globalColor("c")); p2.setDefaultColor(globalColor("c")); p1.setDefaultColor(globalColor("c"));
+
+c4.setPaintingStrategy(PaintingStrategy.HORIZONTAL); p4.setPaintingStrategy(PaintingStrategy.HORIZONTAL);
+c3.setPaintingStrategy(PaintingStrategy.HORIZONTAL); p3.setPaintingStrategy(PaintingStrategy.HORIZONTAL);
+c2.setPaintingStrategy(PaintingStrategy.HORIZONTAL); p2.setPaintingStrategy(PaintingStrategy.HORIZONTAL); 
+c1.setPaintingStrategy(PaintingStrategy.HORIZONTAL); p1.setPaintingStrategy(PaintingStrategy.HORIZONTAL);
