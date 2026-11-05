@@ -1,0 +1,33 @@
+declare lower;
+
+# Constants ....
+def price = close(period = AggregationPeriod.DAY);
+def log_returns = Log(price / price[1]);
+def annualize = Sqrt(252);
+
+# Carry forward last IV if there is none ...
+def iv0 = imp_volatility();
+def iv = if !IsNaN(iv0) then iv0 else iv0[-1];
+
+# 252
+def l_rv = StDev(log_returns, 252) * annualize;
+plot l = iv / l_rv - 1;
+l.SetDefaultColor(CreateColor(255, 100, 100));
+l.HideBubble();
+
+#  62
+def m_rv = StDev(log_returns, 62) * annualize;
+plot m = iv / m_rv - 1;
+m.SetDefaultColor(CreateColor(255, 175, 050));
+m.HideBubble();
+
+#  21
+def s_rv = StDev(log_returns, 21) * annualize;
+plot s = iv / s_rv - 1;
+s.SetDefaultColor(CreateColor(025, 150, 025));
+s.HideBubble();
+
+# Zero line 
+plot zero =  0;
+zero.SetDefaultColor(Color.BLACK);
+zero.SetStyle(Curve.MEDIUM_DASH);

@@ -1,10 +1,8 @@
 declare lower;
 
 # Contants ...
-def price = hlc3;
-def type = AverageType.SIMPLE;
-def p = price;
-def t = type;
+def p = hlc3;
+def t = AverageType.SIMPLE;
 
 # 21
 def s_a = MovingAverage(t, p, 21);
