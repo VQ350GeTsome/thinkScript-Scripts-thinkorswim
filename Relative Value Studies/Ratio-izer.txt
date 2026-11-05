@@ -1,0 +1,34 @@
+declare lower;
+
+input denominator = "SPX";
+#hint denominator: This symbol will be used as the denominator. For example if you want to compare the price performance of SPY versus Gold you can go to SPY and enter /GC. 
+
+def oa =  open;
+def ha =  high;
+def la =   low;
+def ca = close;
+
+def ob =  open(symbol = denominator);
+def hb =  high(symbol = denominator);
+def lb =   low(symbol = denominator);
+def cb = close(symbol = denominator);
+
+# Bodies
+def o = oa / ob;
+def c = ca / cb;
+
+# Wicks
+def w1 = ha / hb;
+def w2 = la / lb;
+def h = max(c, max(o, max(w1, w2)));
+def l = min(c, min(o, min(w1, w2)));
+
+addChart(high = h, low = l, open = o, close = c, type = ChartType.CANDLE ,Color.CURRENT);
+
+input show_average = yes; #Hint show_average: Show the average of the ratio using hlc3.
+input length = 62; #Hint length: Length of the average.
+input type = AverageType.SIMPLE; #Hint type: Type of the average.
+
+plot avg = movingAverage(type, (h+l+c)/3, length);
+avg.hideBubble();
+avg.setDefaultColor(Color.DARK_RED);

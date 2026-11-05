@@ -1,0 +1,24 @@
+input symbol = "SPX"; #Hint symbol: Symbol to use as the comparison.
+input length = 252; #Hint length: Lookback window.
+input average_type = AverageType.SIMPLE; #Hint average_type: Type of average to use when taking the average ratio.
+
+def pn = hlc3;
+def pd = hlc3(symbol = symbol);
+
+def ratio = pn / pd;
+def avg = MovingAverage(average_type, ratio, length);
+
+plot value = pd * avg;
+value.hideBubble();
+value.setDefaultColor(Color.ORANGE);
+
+input show_bands = yes; #Hint show_bands: AKA envelope or whatever.
+input sig = 1; #Hint sig: Amount of Standard Deviations to use for bands.
+
+def std = stdev(pn, length);
+plot upper = value + std;
+plot lower = value - std;
+upper.hideBubble();
+lower.hideBubble();
+upper.setDefaultColor(Color.PLUM);
+lower.setDefaultColor(Color.PLUM);
