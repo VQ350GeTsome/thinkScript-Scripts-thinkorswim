@@ -1,0 +1,281 @@
+#Hint: Fractal Moving Average
+
+# User inputs
+input length = 21;
+input octaves = 16;
+input average_type = AverageType.WEIGHTED;
+input quadratic_mode = no;
+input display_regular = yes;
+input display_reverse = no; 
+input cloud_mode = no; 
+input show_ribbon = no;
+
+# Colors
+defineGlobalColor("ST", createColor(050,150,250));
+defineGlobalColor("LT", createColor(250,150,050));
+
+# Clamp to [2, 32]
+def o = if octaves > 32 then 32 else if octaves < 2 then 2 else octaves;
+# Aprox quadratic weighting
+def PI = 3.14159265359;
+def w = ((PI*PI) / 6) - (1 / (o + 0.55));
+
+# Get Harmonic Number
+def h = 
+
+         if quadratic_mode then w
+
+    else if o ==  2 then 1.5
+    else if o ==  3 then 1.83333333333
+    else if o ==  4 then 2.08333333333
+    else if o ==  5 then 2.28333333333
+    else if o ==  6 then 2.45
+    else if o ==  7 then 2.59285714286
+    else if o ==  8 then 2.71785714286
+    else if o ==  9 then 2.82896825397
+    else if o == 10 then 2.92896825397
+    else if o == 11 then 3.01987734488
+    else if o == 12 then 3.10321067821
+    else if o == 13 then 3.18013375513
+    else if o == 14 then 3.25156232656
+    else if o == 15 then 3.31822899323
+    else if o == 16 then 3.38072899323
+    else if o == 17 then 3.43955252264
+    else if o == 18 then 3.49510807820
+    else if o == 19 then 3.54773965714
+    else if o == 20 then 3.59773965714
+    else if o == 21 then 3.64535870476
+    else if o == 22 then 3.69081325022
+    else if o == 23 then 3.73429151109
+    else if o == 24 then 3.77595817775
+    else if o == 25 then 3.81595817775
+    else if o == 26 then 3.85441971622
+    else if o == 27 then 3.89145675325
+    else if o == 28 then 3.92717103897
+    else if o == 29 then 3.96165379759
+    else if o == 30 then 3.99498713092
+    else if o == 31 then 4.02724519544
+    else if o == 32 then 4.05849519544
+    else Double.NaN;
+
+# Shorthand constants
+def l = (length / h);
+def p = hlc3;
+def t = average_type;
+def nan = Double.NaN;
+
+# All the averages
+def a1 = Average(p, l);
+def a2 = Average(p, l * 2);
+def a3 = if o >  2 then MovingAverage(t, p, l *  3) else 0;
+def a4 = if o >  3 then MovingAverage(t, p, l *  4) else 0;
+def a5 = if o >  4 then MovingAverage(t, p, l *  5) else 0;
+def a6 = if o >  5 then MovingAverage(t, p, l *  6) else 0;
+def a7 = if o >  6 then MovingAverage(t, p, l *  7) else 0;
+def a8 = if o >  7 then MovingAverage(t, p, l *  8) else 0;
+def a9 = if o >  8 then MovingAverage(t, p, l *  9) else 0;
+def aA = if o >  9 then MovingAverage(t, p, l * 10) else 0;
+def aB = if o > 10 then MovingAverage(t, p, l * 11) else 0;
+def aC = if o > 11 then MovingAverage(t, p, l * 12) else 0;
+def aD = if o > 12 then MovingAverage(t, p, l * 13) else 0;
+def aE = if o > 13 then MovingAverage(t, p, l * 14) else 0;
+def aF = if o > 14 then MovingAverage(t, p, l * 15) else 0;
+def aG = if o > 15 then MovingAverage(t, p, l * 16) else 0;
+def aH = if o > 16 then MovingAverage(t, p, l * 17) else 0;
+def aI = if o > 17 then MovingAverage(t, p, l * 18) else 0;
+def aJ = if o > 18 then MovingAverage(t, p, l * 19) else 0;
+def aK = if o > 19 then MovingAverage(t, p, l * 20) else 0;
+def aL = if o > 20 then MovingAverage(t, p, l * 21) else 0;
+def aM = if o > 21 then MovingAverage(t, p, l * 22) else 0;
+def aN = if o > 22 then MovingAverage(t, p, l * 23) else 0;
+def aO = if o > 23 then MovingAverage(t, p, l * 24) else 0;
+def aP = if o > 24 then MovingAverage(t, p, l * 25) else 0;
+def aQ = if o > 25 then MovingAverage(t, p, l * 26) else 0;
+def aR = if o > 26 then MovingAverage(t, p, l * 27) else 0;
+def aS = if o > 27 then MovingAverage(t, p, l * 28) else 0;
+def aT = if o > 28 then MovingAverage(t, p, l * 29) else 0;
+def aU = if o > 29 then MovingAverage(t, p, l * 30) else 0;
+def aV = if o > 30 then MovingAverage(t, p, l * 31) else 0;
+def aW = if o > 31 then MovingAverage(t, p, l * 32) else 0;
+
+# Weighted sSums
+def avg_f = 
+    a1 + a2 / 2 + a3 / 3 + a4 / 4 + a5 / 5 + a6 / 6 + a7 / 7 + a8 / 8 + 
+    a9 / 9 + aA / 10 + aB / 11 + aC / 12 + aD / 13 + aE / 14 + aF / 15 + 
+    aG / 16 + aH / 17 + aI / 18 + aJ / 19 + aK / 20 + aL / 21 + aM / 22 +
+    aN / 23 + aO / 24 + aP / 25 + aQ / 26 + aR / 27 + aS / 28 + aT / 29 + 
+    aU / 30 + aV / 31 + aW / 32
+;
+def avg_r = 
+    a1 / o + a2 / (o - 1) + 
+    a3 * (if o >  2 then 1 / (o -  2) else 0) + 
+    a4 * (if o >  3 then 1 / (o -  3) else 0) +
+    a5 * (if o >  4 then 1 / (o -  4) else 0) +
+    a6 * (if o >  5 then 1 / (o -  5) else 0) +
+    a7 * (if o >  6 then 1 / (o -  6) else 0) +
+    a8 * (if o >  7 then 1 / (o -  7) else 0) +
+    a9 * (if o >  8 then 1 / (o -  8) else 0) + 
+    aA * (if o >  9 then 1 / (o -  9) else 0) +
+    aB * (if o > 10 then 1 / (o - 10) else 0) +
+    aC * (if o > 11 then 1 / (o - 11) else 0) +
+    aD * (if o > 12 then 1 / (o - 12) else 0) +
+    aE * (if o > 13 then 1 / (o - 13) else 0) +
+    aF * (if o > 14 then 1 / (o - 14) else 0) +
+    aG * (if o > 15 then 1 / (o - 15) else 0) +
+    aH * (if o > 16 then 1 / (o - 16) else 0) +
+    aI * (if o > 17 then 1 / (o - 17) else 0) +
+    aJ * (if o > 18 then 1 / (o - 18) else 0) +
+    aK * (if o > 19 then 1 / (o - 19) else 0) +
+    aL * (if o > 20 then 1 / (o - 20) else 0) +
+    aM * (if o > 21 then 1 / (o - 21) else 0) +
+    aN * (if o > 22 then 1 / (o - 22) else 0) +
+    aO * (if o > 23 then 1 / (o - 23) else 0) +
+    aP * (if o > 24 then 1 / (o - 24) else 0) +
+    aQ * (if o > 25 then 1 / (o - 25) else 0) +
+    aR * (if o > 26 then 1 / (o - 26) else 0) +
+    aS * (if o > 27 then 1 / (o - 27) else 0) +
+    aT * (if o > 28 then 1 / (o - 28) else 0) +
+    aU * (if o > 29 then 1 / (o - 29) else 0) +
+    aV * (if o > 30 then 1 / (o - 30) else 0) +
+    aW * (if o > 31 then 1 / (o - 31) else 0)
+;
+def avg_q = 
+    a1 + a2 / 4 + a3 / 9 + a4 / 16 + a5 / 25 + a6 / 32 + 
+    a7 / 49 + a8 / 64 + a9 / 81 + aA / 100 + aB / 121 + 
+    aC / 144 + aD / 169 + aE / 196 + aF / 225 + aG / 256 + 
+    aH / 289 + aI / 324 + aJ / 361 +  aK / 400 + aL / 441 + 
+    aM / 484 + aN / 529 + aO / 576 + aP / 625 + aQ / 676 + 
+    aR / 729 + aS / 784 + aT / 841 + aU / 900 + aV / 961 + aW / 1024
+;
+def avg_e = 
+    a1 / 2 + a3 / 4 + a4 / 8 + a5 / 16 + a6 / 32 + a7 / 64 + 
+    a8 / 128 + a9 / 256 + aA / 512 + aB / 1024 + aC / 2048 +
+    aD / 4096 + aE / 8192 + aF / 16384 + aG / 32768 + aH / 65536 +
+    aI / 131072
+;
+
+# Linear Fractal Moving Average
+plot FMA = if (!display_regular or show_ribbon or quadratic_mode) then nan else avg_f / h;
+FMA.setDefaultColor(globalColor("ST"));
+
+# Linear reverse weighted
+plot RFMA = if (!display_reverse or show_ribbon or quadratic_mode) then nan else avg_r / h;
+RFMA.SetDefaultColor(globalColor("LT"));
+
+# Quadratic FMA
+plot QFMA = if (!display_reverse or show_ribbon or !quadratic_mode) then nan else avg_q / h;
+QFMA.setDefaultColor(globalColor("ST"));
+
+# Cloud 
+addCloud(if cloud_mode then FMA else nan, if cloud_mode then RFMA else nan, globalColor("ST"), globalColor("LT"));
+
+# Ribbon
+plot a1_p = if (show_ribbon) then a1 else nan;
+plot a2_p = if (show_ribbon) then a2 else nan;
+plot a3_p = if (show_ribbon and o >  2) then a3 else nan;
+plot a4_p = if (show_ribbon and o >  3) then a4 else nan;
+plot a5_p = if (show_ribbon and o >  4) then a5 else nan;
+plot a6_p = if (show_ribbon and o >  5) then a6 else nan;
+plot a7_p = if (show_ribbon and o >  6) then a7 else nan;
+plot a8_p = if (show_ribbon and o >  7) then a8 else nan;
+plot a9_p = if (show_ribbon and o >  8) then a9 else nan;
+plot aA_p = if (show_ribbon and o >  9) then aA else nan;
+plot aB_p = if (show_ribbon and o > 10) then aB else nan;
+plot aC_p = if (show_ribbon and o > 11) then aC else nan;
+plot aD_p = if (show_ribbon and o > 12) then aD else nan;
+plot aE_p = if (show_ribbon and o > 13) then aE else nan;
+plot aF_p = if (show_ribbon and o > 14) then aF else nan;
+plot aG_p = if (show_ribbon and o > 15) then aG else nan;
+plot aH_p = if (show_ribbon and o > 16) then aG else nan;
+plot aI_p = if (show_ribbon and o > 17) then aG else nan;
+plot aJ_p = if (show_ribbon and o > 18) then aG else nan;
+plot aK_p = if (show_ribbon and o > 19) then aG else nan;
+plot aL_p = if (show_ribbon and o > 20) then aG else nan;
+plot aM_p = if (show_ribbon and o > 21) then aG else nan;
+plot aN_p = if (show_ribbon and o > 22) then aG else nan;
+plot aO_p = if (show_ribbon and o > 23) then aG else nan;
+plot aP_p = if (show_ribbon and o > 24) then aG else nan;
+plot aQ_p = if (show_ribbon and o > 25) then aG else nan;
+plot aR_p = if (show_ribbon and o > 26) then aG else nan;
+plot aS_p = if (show_ribbon and o > 27) then aG else nan;
+plot aT_p = if (show_ribbon and o > 28) then aG else nan;
+plot aU_p = if (show_ribbon and o > 29) then aG else nan;
+plot aV_p = if (show_ribbon and o > 30) then aG else nan;
+plot aW_p = if (show_ribbon and o > 31) then aG else nan;
+
+# Ribbon fade
+a1_p.SetDefaultColor(CreateColor(255, 0, 0));
+a2_p.SetDefaultColor(CreateColor(255 * (31 / 32), 0, 0));
+a3_p.SetDefaultColor(CreateColor(255 * (30 / 32), 0, 0));
+a4_p.SetDefaultColor(CreateColor(255 * (29 / 32), 0, 0));
+a5_p.SetDefaultColor(CreateColor(255 * (28 / 32), 0, 0));
+a6_p.SetDefaultColor(CreateColor(255 * (27 / 32), 0, 0));
+a7_p.SetDefaultColor(CreateColor(255 * (26 / 32), 0, 0));
+a8_p.SetDefaultColor(CreateColor(255 * (25 / 32), 0, 0));
+a9_p.SetDefaultColor(CreateColor(255 * (24 / 32), 0, 0));
+aA_p.SetDefaultColor(CreateColor(255 * (23 / 32), 0, 0));
+aB_p.SetDefaultColor(CreateColor(255 * (22 / 32), 0, 0));
+aC_p.SetDefaultColor(CreateColor(255 * (21 / 32), 0, 0));
+aD_p.SetDefaultColor(CreateColor(255 * (20 / 32), 0, 0));
+aE_p.SetDefaultColor(CreateColor(255 * (19 / 32), 0, 0));
+aF_p.SetDefaultColor(CreateColor(255 * (18 / 32), 0, 0));
+aG_p.SetDefaultColor(CreateColor(255 * (17 / 32), 0, 0));
+aH_p.SetDefaultColor(CreateColor(255 * (16 / 32), 0, 0));
+aI_p.SetDefaultColor(CreateColor(255 * (15 / 32), 0, 0));
+aJ_p.SetDefaultColor(CreateColor(255 * (14 / 32), 0, 0));
+aK_p.SetDefaultColor(CreateColor(255 * (13 / 32), 0, 0));
+aL_p.SetDefaultColor(CreateColor(255 * (12 / 32), 0, 0));
+aM_p.SetDefaultColor(CreateColor(255 * (11 / 32), 0, 0));
+aN_p.SetDefaultColor(CreateColor(255 * (10 / 32), 0, 0));
+aO_p.SetDefaultColor(CreateColor(255 * (09 / 32), 0, 0));
+aP_p.SetDefaultColor(CreateColor(255 * (08 / 32), 0, 0));
+aQ_p.SetDefaultColor(CreateColor(255 * (07 / 32), 0, 0));
+aR_p.SetDefaultColor(CreateColor(255 * (06 / 32), 0, 0));
+aS_p.SetDefaultColor(CreateColor(255 * (05 / 32), 0, 0));
+aT_p.SetDefaultColor(CreateColor(255 * (04 / 32), 0, 0));
+aU_p.SetDefaultColor(CreateColor(255 * (03 / 32), 0, 0));
+aV_p.SetDefaultColor(CreateColor(255 * (02 / 32), 0, 0));
+aW_p.SetDefaultColor(CreateColor(255 * (01 / 32), 0, 0));
+
+a1_p.HideTitle();
+a2_p.HideTitle();
+a3_p.HideTitle();
+a4_p.HideTitle();
+a5_p.HideTitle();
+a6_p.HideTitle();
+a7_p.HideTitle();
+a8_p.HideTitle();
+a9_p.HideTitle();
+aA_p.HideTitle();
+aB_p.HideTitle();
+aC_p.HideTitle();
+aD_p.HideTitle();
+aE_p.HideTitle();
+aF_p.HideTitle();
+aG_p.HideTitle();
+aH_p.HideTitle();
+aI_p.HideTitle();
+aJ_p.HideTitle();
+aK_p.HideTitle();
+aL_p.HideTitle();
+aM_p.HideTitle();
+aN_p.HideTitle();
+aO_p.HideTitle();
+aP_p.HideTitle();
+aQ_p.HideTitle();
+aR_p.HideTitle();
+aS_p.HideTitle();
+aT_p.HideTitle();
+aU_p.HideTitle();
+aV_p.HideTitle();
+aW_p.HideTitle();
+
+# Hints
+#hint length: Raw Length. Real length is this divided by the <b>nth</b> harmonic number where <b>n = octaves</b>.
+#hint octaves: How many moving averages to use. If you just want one octave, use a regular moving average of whatever type you picked. 32 is the max implemented, anything more than that is kinda useless. I personally only go up to 16.
+#hint average_type: Simple & Weighted seems to produce the best results.
+#hint quadratic_mode: Instead of linear weighting, use quadratic weighting ... this only makes the FMA more similar to a regular moving average ... but it's interesting nonetheless.
+#hint display_regular: Plot the actual main moving average. Turn off if you only want the reverse.
+#hint display_reverse: Plot the reverse weighted moving average. Great for crossovers.
+#hint cloud_mode: Displays a cloud between the FMA & Reverse FMA ( RFMA ).
+#hint show_ribbon: Turns off the regular FMA & RFMA, and instead displays the ribbon used to calculate them.
