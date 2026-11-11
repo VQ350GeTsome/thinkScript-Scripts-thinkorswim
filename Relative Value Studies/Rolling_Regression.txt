@@ -27,18 +27,18 @@ def xdist = x - xmean;
 def ydist = y - ymean;
 
 def cov0 = (
-    fold i0 = 0 to window with n0 = 0 do
+    fold i0 = 1 to window+1 with n0 = 0 do
         n0 + ((x[i0] - xmean) * (y[i0] - ymean))
 );
 
 def cov = (cov0) / (window - 1);
 
 def xdistsumsqr = (
-    fold i1 = 0 to window with n1 = 0 do
+    fold i1 = 1 to window+1 with n1 = 0 do
         n1 + ((x[i1] - xmean) * (x[i1] - xmean))
 );
 def ydistsumsqr = (
-    fold i2 = 0 to window with n2 = 0 do
+    fold i2 = 1 to window+1 with n2 = 0 do
         n2 + ((y[i2] - ymean) * (y[i2] - ymean))
 );
 def xvar = xdistsumsqr / (window - 1);
