@@ -9,10 +9,10 @@ input show_line = yes; #Hint show_line: Show history of predicted values.
 input show_extrapolation = no; #Hint show_extrapolation: Change the color of the predicted value line to show when the model is extrapolating versus interpolating.
 
 # Label Settings ...
-input show_predicted_price = yes; #Hint show_predicted_price: Creates a Label to display the Predicted Price.
-input show_correlation = yes; #Hint show_correlation: Creates a Label to display Correlation.
-input show_premium_discount = yes; #Hint show_premium_discount: Creates a Label to display the premium or discount compared to the predicted fair value.
-input show_beta = yes; #Hint show_beta: Creates a Label to display the Beta.
+input show_predicted_price_label = yes; #Hint show_predicted_price: Creates a Label to display the Predicted Price.
+input show_correlation_label = yes; #Hint show_correlation: Creates a Label to display Correlation.
+input show_premium_discount_label = yes; #Hint show_premium_discount: Creates a Label to display the premium or discount compared to the predicted fair value.
+input show_beta_label = yes; #Hint show_beta: Creates a Label to display the Beta.
 
 # Make sure the period is at least a DAY.
 def p = if GetAggregationPeriod() < AggregationPeriod.DAY then AggregationPeriod.DAY else GetAggregationPeriod();
@@ -63,11 +63,11 @@ def interpolation = xmin[1] <= x and x <= xmax[1];
 pred_plot.AssignValueColor(if interpolation or !show_extrapolation then CreateColor(050, 150, 250) else CreateColor(250, 150, 050));
 
 # Labels ...
-AddLabel(show_predicted_price, "Predicted Price: $" + Round(pred, 2), Color.BLACK, Location.TOP_LEFT);
-AddLabel(show_correlation, "Correlation: " + Round((AbsValue(corcoeff) * 100), 2) + "%", Color.BLACK, Location.TOP_LEFT);
-AddLabel(show_premium_discount, 
+AddLabel(show_predicted_price_label, "Predicted Price: $" + Round(pred, 2), Color.BLACK, Location.TOP_LEFT);
+AddLabel(show_correlation_label, "Correlation: " + Round((AbsValue(corcoeff) * 100), 2) + "%", Color.BLACK, Location.TOP_LEFT);
+AddLabel(show_premium_discount_label, 
     (if close > pred then "Premium: " else "Discount: ") + 
         Round(100 * ((close / pred) - 1), 2) + "%",
 Color.BLACK, Location.TOP_LEFT
 );
-AddLabel(show_beta, "Beta: " + Round((ystd / y) / (xstd / x), 3), Color.BLACK, Location.TOP_LEFT);
+AddLabel(show_beta_label, "Beta: " + Round((ystd / y) / (xstd / x), 3), Color.BLACK, Location.TOP_LEFT);

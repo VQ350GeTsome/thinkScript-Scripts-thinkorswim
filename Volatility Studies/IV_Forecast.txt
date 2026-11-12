@@ -1,11 +1,11 @@
 declare upper;
 
-input lookback_days = 31; #Hint lookback: Lookback window in calendar days.
+input days = 31; #Hint days: Days forward to predict.
 input sig = 1; #Hint sig: Amount of Standard Deviations.
 input show_mid = no;  #Hint show_mid: Show the middle of the bands. Also known as what the price was lookback_days ago.
 
 # Adjust lookback to trading days ...
-def lookback = RoundUp(252 * (lookback_days / 365));
+def lookback = RoundUp(252 * (days / 365));
 
 def rv = StDev(Log(close / close[1]), lookback) * Sqrt(252);
 
