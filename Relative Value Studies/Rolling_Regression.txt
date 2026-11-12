@@ -1,5 +1,7 @@
 declare upper;
 
+#Hint: Uses a linear regression to predict a fair value for the symbol on the chart. <br>Beware of trends : High R but no true correlation. <br>Beware of dividends : An ex-date on this or the other symbol will change the predicted values. If the dividend is super high and / or the ex-date between the two is not close to the other, the predicted price will vary.
+
 # Regression Settings ...
 input symbol = "SPX"; #Hint symbol: Other stock, ETF, futures contract, index, or whatever to use to predict the fair value.
 input window = 252; #Hint window: Lookback window for data. Recommended to be above 252 (1 Trading Year).
@@ -9,16 +11,16 @@ input show_line = yes; #Hint show_line: Show history of predicted values.
 input show_extrapolation = no; #Hint show_extrapolation: Change the color of the predicted value line to show when the model is extrapolating versus interpolating.
 
 # Label Settings ...
-input show_predicted_price_label = yes; #Hint show_predicted_price: Creates a Label to display the Predicted Price.
-input show_correlation_label = yes; #Hint show_correlation: Creates a Label to display Correlation.
-input show_premium_discount_label = yes; #Hint show_premium_discount: Creates a Label to display the premium or discount compared to the predicted fair value.
-input show_beta_label = yes; #Hint show_beta: Creates a Label to display the Beta.
+input show_predicted_price_label = yes; #Hint show_predicted_price_label: Creates a Label to display the Predicted Price.
+input show_r_label = yes; #Hint show_r_label: Creates a Label to display Correlation.
+input show_premium_discount_label = yes; #Hint show_premium_discount_label: Creates a Label to display the premium or discount compared to the predicted fair value.
+input show_beta_label = yes; #Hint show_beta_label: Creates a Label to display the Beta.
 
 # Make sure the period is at least a DAY.
 def p = if GetAggregationPeriod() < AggregationPeriod.DAY then AggregationPeriod.DAY else GetAggregationPeriod();
 
-def x = close(symbol = symbol, period = p);
-def y = close(period = p);
+def x = Log(close(symbol = symbol, period = p));
+def y = Log(close(period = p));
 
 def xmean = Average(x, window);
 def ymean = Average(y, window);
@@ -27,19 +29,19 @@ def xdist = x - xmean;
 def ydist = y - ymean;
 
 def cov0 = (
-    fold i0 = 1 to window+1 with n0 = 0 do
-        n0 + ((x[i0] - xmean) * (y[i0] - ymean))
+    fold i0 = 1 to window + 1 with n0 = 0 do
+        n0 + ((x[i0] - xmean[1]) * (y[i0] - ymean[1]))
 );
 
 def cov = (cov0) / (window - 1);
 
 def xdistsumsqr = (
-    fold i1 = 1 to window+1 with n1 = 0 do
-        n1 + ((x[i1] - xmean) * (x[i1] - xmean))
+    fold i1 = 1 to window + 1 with n1 = 0 do
+        n1 + ((x[i1] - xmean[1]) * (x[i1] - xmean[1]))
 );
 def ydistsumsqr = (
-    fold i2 = 1 to window+1 with n2 = 0 do
-        n2 + ((y[i2] - ymean) * (y[i2] - ymean))
+    fold i2 = 1 to window + 1 with n2 = 0 do
+        n2 + ((y[i2] - ymean[1]) * (y[i2] - ymean[1]))
 );
 def xvar = xdistsumsqr / (window - 1);
 def yvar = ydistsumsqr / (window - 1);
@@ -52,7 +54,7 @@ def beta = ystd / xstd;
 def m = corcoeff * beta;
 def b = ymean - (xmean * m);
 
-def pred = m * x + b;
+def pred = Exp(m * x + b);
 plot pred_plot = if show_line then pred else Double.NaN;
 pred_plot.HideBubble();
 
@@ -64,10 +66,10 @@ pred_plot.AssignValueColor(if interpolation or !show_extrapolation then CreateCo
 
 # Labels ...
 AddLabel(show_predicted_price_label, "Predicted Price: $" + Round(pred, 2), Color.BLACK, Location.TOP_LEFT);
-AddLabel(show_correlation_label, "Correlation: " + Round((AbsValue(corcoeff) * 100), 2) + "%", Color.BLACK, Location.TOP_LEFT);
+AddLabel(show_r_label, "R: " + Round((AbsValue(corcoeff) * 100), 2) + "%  " + "R^2: " + Round((AbsValue(corcoeff*corcoeff) * 100), 2) + "%", Color.BLACK, Location.TOP_LEFT);
 AddLabel(show_premium_discount_label, 
     (if close > pred then "Premium: " else "Discount: ") + 
         Round(100 * ((close / pred) - 1), 2) + "%",
 Color.BLACK, Location.TOP_LEFT
 );
-AddLabel(show_beta_label, "Beta: " + Round((ystd / y) / (xstd / x), 3), Color.BLACK, Location.TOP_LEFT);
+AddLabel(show_beta_label, "Beta: " + Round(m, 3), Color.BLACK, Location.TOP_LEFT);
