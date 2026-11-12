@@ -4,7 +4,9 @@ declare upper;
 
 # Regression Settings ...
 input symbol = "SPX"; #Hint symbol: Other stock, ETF, futures contract, index, or whatever to use to predict the fair value.
-input window = 252; #Hint window: Lookback window for data. Recommended to be above 252 (1 Trading Year).
+input window = 252; #Hint window: Lookback window for data. Recommended to be above 252 (1 Trading Year). This is what the model will be traded on. The window does NOT include today. So a window of 252 will use a bar from 253 trading days ago.
+input extra_out_of_sample_push = 0; #Hint extra_out_of_sample_push: The model is, by default, trained on the last "window" days to then predict today. But, if you would like you can add more days to not include. So: by default it's [-window, yesterday] but you can do [-window - extra, yesterday - extra]. For example: A window of 252 would be: [-253, -1], but if you add 20 days it would be: [-273, -21].
+def oosp = max(extra_out_of_sample_push+1,1);
 
 # Predicted Value Line Settings ...
 input show_line = yes; #Hint show_line: Show history of predicted values.
@@ -29,19 +31,19 @@ def xdist = x - xmean;
 def ydist = y - ymean;
 
 def cov0 = (
-    fold i0 = 1 to window + 1 with n0 = 0 do
-        n0 + ((x[i0] - xmean[1]) * (y[i0] - ymean[1]))
+    fold i0 = oosp to window + oosp with n0 = 0 do
+        n0 + ((x[i0] - xmean[oosp]) * (y[i0] - ymean[oosp]))
 );
 
 def cov = (cov0) / (window - 1);
 
 def xdistsumsqr = (
-    fold i1 = 1 to window + 1 with n1 = 0 do
-        n1 + ((x[i1] - xmean[1]) * (x[i1] - xmean[1]))
+    fold i1 = oosp to window + oosp with n1 = 0 do
+        n1 + ((x[i1] - xmean[oosp]) * (x[i1] - xmean[oosp]))
 );
 def ydistsumsqr = (
-    fold i2 = 1 to window + 1 with n2 = 0 do
-        n2 + ((y[i2] - ymean[1]) * (y[i2] - ymean[1]))
+    fold i2 = oosp to window + oosp with n2 = 0 do
+        n2 + ((y[i2] - ymean[oosp]) * (y[i2] - ymean[oosp]))
 );
 def xvar = xdistsumsqr / (window - 1);
 def yvar = ydistsumsqr / (window - 1);
