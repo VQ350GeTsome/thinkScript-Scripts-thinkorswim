@@ -1,0 +1,32 @@
+declare lower;
+
+input show_iv = yes; #Hint show_iv: Displays the Implied Volatility.
+input show_rv = yes; #Hint show_rv: Displays the Realized Volatility.
+input displace_rv = yes; #Hint displace_rv: Displaces Realized Volatility to compare the predicted volatility (IV) to realized.
+input transform_to_precentile = no; #Hint transform_to_precentile: Transforms both IV and RV into precentiles.
+input precentile_length = 252; #Hint precentile_length: Length to use to calculate the precentile.
+
+# Get IV
+def iv = imp_volatility();
+
+# Calculate RV
+def p = hlc3;
+def log_return = if show_rv then log(p/p[1]) else Double.NaN;
+def lr = if displace_rv then log_return[-21] else log_return;
+def rv = sqrt(252) * stdev(lr, 30);
+
+# Transform them if needed
+plot iv_p = 
+    if transform_to_precentile then
+        (fold i0 = 1 to precentile_length + 1 with c0 = 0 do if iv[i0] > iv then c0 + 1 else c0) / precentile_length
+    else
+        iv
+;
+plot rv_p = 
+    if transform_to_precentile then
+        (fold i1 = 1 to precentile_length + 1 with c1 = 0 do if rv[i1] > rv then c1 + 1 else c1)/ precentile_length
+    else 
+        rv
+;
+iv_p.setDefaultColor(createColor(050,150,250));
+rv_p.setDefaultColor(createColor(250,150,050));

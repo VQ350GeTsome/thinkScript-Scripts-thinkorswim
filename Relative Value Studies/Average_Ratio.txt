@@ -12,10 +12,10 @@ plot value = pd * avg;
 value.hideBubble();
 value.setDefaultColor(Color.ORANGE);
 
-input show_bands = yes; #Hint show_bands: AKA envelope or whatever.
+input show_bands = no; #Hint show_bands: AKA envelope or whatever.
 input sig = 1; #Hint sig: Amount of Standard Deviations to use for bands.
 
-def std = stdev(pn, length);
+def std = if show_bands then stdev(pn, length) else Double.NaN;
 plot upper = value + std;
 plot lower = value - std;
 upper.hideBubble();
