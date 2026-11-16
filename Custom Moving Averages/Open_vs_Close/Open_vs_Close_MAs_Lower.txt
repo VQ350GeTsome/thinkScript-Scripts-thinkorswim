@@ -1,0 +1,20 @@
+#Hint: Plots two moving averages. One using the closing price, one using the open price.
+
+declare lower;
+
+input length = 5; #Hint length: Length for the two moving averages.
+input type = averageType.SIMPLE; #Hint type: Type of moving average to use for both.
+
+# Calculate both averages and the % difference
+def OMA = movingAverage(type,  open, length);
+def CMA = movingAverage(type, close, length);
+plot tilt = (CMA / OMA) - 1;
+
+# Vanity ...
+input color_change = no; #Hint color_change: Change color based on if the OMA > CMA.
+tilt.assignValueColor(if tilt > 0 and !color_change then Color.PINK else Color.CYAN);
+
+# Zero line
+plot zero =  0;
+zero.SetDefaultColor(Color.BLACK);
+zero.SetStyle(Curve.MEDIUM_DASH);

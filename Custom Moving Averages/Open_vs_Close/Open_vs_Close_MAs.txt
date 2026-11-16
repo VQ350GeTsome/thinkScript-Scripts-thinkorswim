@@ -1,0 +1,14 @@
+#Hint: Calculates two moving averages. One using the closing price, one using the open price. Then, uses the ...
+
+input length = 5; #Hint length: Length for the two moving averages.
+input type = averageType.SIMPLE; #Hint type: Type of moving average to use for both.
+
+# Calculate and plot both averages
+plot OMA = movingAverage(type,  open, length);
+plot CMA = movingAverage(type, close, length);
+
+# Vanity ... 
+OMA.setDefaultColor(Color.CYAN);
+CMA.setDefaultColor(Color.PINK);
+input show_cloud = no;
+addCloud(OMA, if show_cloud then CMA else Double.NaN, Color.CYAN, Color.PINK);
