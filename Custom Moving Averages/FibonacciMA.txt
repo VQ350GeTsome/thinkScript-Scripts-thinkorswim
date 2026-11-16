@@ -1,0 +1,24 @@
+input length = 21; #Hint length: Length of the moving average. Due to the weights shrinking so fast, a length above 21 (a month) doesn't have a noticable effect.
+input price = hlc3; #Hint price: Price to use for the average.
+
+def p = price; 
+def l = length;
+
+def sqrfive = sqrt(5);
+
+# Normal Phi
+def phin = (1 + sqrfive)/2;
+# Conjugate Phi
+def phic = (1 - sqrfive)/2;
+
+def weighting = 
+    fold i0 = 1 to length with n0 = 0 do 
+        n0 + 
+        (1/((power(phin, i0) - power(phic, i0)) / sqrfive) * p[i0])
+;
+def weight_sum =
+    fold i1 = 1 to length with n1 = 0 do 
+            n1 + 1/((power(phin, i1) - power(phic, i1)) / sqrfive)
+;
+
+plot FibMA = weighting / weight_sum;
