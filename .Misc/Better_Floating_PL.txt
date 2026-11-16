@@ -1,13 +1,22 @@
 declare lower;
 
-plot zero = 0;
-zero.SetDefaultColor(Color.BLACK);
+input compare_mode = {default "Raw", "OverUnder"};
 
-plot PL = FloatingPL();
+# Strategy performance
+plot PL = if compare_mode == compare_mode.Raw then FloatingPL() else Double.NaN; 
 PL.AssignValueColor(if PL[1] < PL then Color.GREEN else if PL[1] == PL then Color.BLACK else Color.RED);
 
-# Cummulative change
+# Buy n Hold
 def change = close - close[1];
-def cum = change + cum[1];
-plot BH = cum;
+def cum = change + cum[1]; # Accumulate Changes
+plot BH = if compare_mode == compare_mode.Raw then cum else Double.NaN; 
 BH.SetDefaultColor(Color.PLUM);
+
+# If OverUnder mode ...
+plot OU = if compare_mode == compare_mode.OverUnder then FloatingPL() - cum else Double.NaN;
+OU.AssignValueColor(if OU[1] < OU then Color.GREEN else if OU[1] == OU then Color.BLACK else Color.RED);
+
+# Zero line
+plot zero =  0;
+zero.SetDefaultColor(Color.BLACK);
+zero.SetStyle(Curve.MEDIUM_DASH);

@@ -1,0 +1,11 @@
+input length = 21; #Hint length: Length of moving average
+input price = hlc3; #Hint price: Price to use to take the average of
+input type = averageType.SIMPLE; #Hint type: Type of average to use
+input p = 1.0; #Hint p: p value. When p > 1, higher values are weighed more. If p < 1 smaller values are weighed more. If p = 0 then the MA will be equal to the LogMA.
+
+plot HoelderMA =
+    if p == 0 then 
+        exp(movingAverage(type, log(price), length))
+    else
+        power(movingAverage(type, power(price, p), length), 1/p)
+;
