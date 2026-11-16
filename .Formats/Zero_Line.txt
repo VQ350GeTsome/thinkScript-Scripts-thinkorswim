@@ -1,0 +1,4 @@
+# Zero line
+plot zero =  0;
+zero.SetDefaultColor(Color.BLACK);
+zero.SetStyle(Curve.MEDIUM_DASH);

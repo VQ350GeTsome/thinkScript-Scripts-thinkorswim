@@ -1,0 +1,13 @@
+declare lower;
+
+plot zero = 0;
+zero.SetDefaultColor(Color.BLACK);
+
+plot PL = FloatingPL();
+PL.AssignValueColor(if PL[1] < PL then Color.GREEN else if PL[1] == PL then Color.BLACK else Color.RED);
+
+# Cummulative change
+def change = close - close[1];
+def cum = change + cum[1];
+plot BH = cum;
+BH.SetDefaultColor(Color.PLUM);
