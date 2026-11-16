@@ -1,0 +1,61 @@
+#Hint: Calculates two moving averages. One using the closing price, one using the open price. Then, uses the ...
+
+input length = 5; #Hint length: Length for the two moving averages.
+input type = AverageType.SIMPLE; #Hint type: Type of moving average to use for both.
+
+# Calculate and plot both averages
+plot OMA = MovingAverage(type,  open, length);
+plot CMA = MovingAverage(type, close, length);
+
+# Vanity ... 
+OMA.SetDefaultColor(Color.CYAN);
+CMA.SetDefaultColor(Color.PINK);
+input show_cloud = no;
+AddCloud(OMA, if show_cloud then CMA else Double.NaN, Color.CYAN, Color.PINK);
+
+# Orders ...
+
+# Conditions
+def long_c = CMA crosses above OMA;
+def exit_c = CMA crosses below OMA;
+
+#Settings
+input allow_shorting = no; #Hint allow_shorting: If yes, allows shorting, if no, long-only.
+input fill_price = {default "MOC", "MOO"};  #Hint fill_price: Price to use for fills, Market-on-Close or Market-on-Open. MOC will use the closing price and the day of the signal going off. MOO will use the open price for the day after the signal going off.
+def price =
+    if fill_price == fill_price."MOC" then 
+        close 
+    else if fill_price == fill_price."MOO" then
+        open[-1]
+    else 0
+;
+input inverse = no; #Hint inverse: Inverses the strategy, longs are now exits or shorts ... an exit or a short is now a long.
+def long = if inverse then exit_c else long_c;
+def exit = if inverse then long_c else exit_c;
+
+# Buy or Long
+addOrder(
+    orderType.BUY_AUTO, 
+    long, 
+    price, 
+    1, 
+    Color.GREEN, Color.GREEN, 
+    "Long"); 
+# Exit (not short)
+addOrder(
+    orderType.SELL_TO_CLOSE,
+    exit and !allow_shorting, 
+    price, 
+    1, 
+    Color.PLUM, Color.PLUM,   
+    "Exit"
+); 
+# Short
+addOrder(
+    orderType.SELL_AUTO,
+    exit and allow_shorting, 
+    price, 
+    1, 
+    Color.RED, Color.RED,   
+    "Short"
+); 

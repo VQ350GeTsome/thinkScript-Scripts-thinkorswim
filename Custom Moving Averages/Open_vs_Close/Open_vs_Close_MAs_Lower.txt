@@ -11,8 +11,14 @@ def CMA = movingAverage(type, close, length);
 plot tilt = (CMA / OMA) - 1;
 
 # Vanity ...
-input color_change = no; #Hint color_change: Change color based on if the OMA > CMA.
-tilt.assignValueColor(if tilt > 0 and !color_change then Color.PINK else Color.CYAN);
+input plot_color_change = no; #Hint plot_color_change: Change color based on if the OMA > CMA.
+tilt.assignValueColor(if tilt > 0 and plot_color_change then Color.PINK else Color.CYAN);
+input price_color_change = no;
+assignPriceColor(
+    if price_color_change then
+        if tilt > 0 then Color.DARK_GREEN else Color.DARK_RED
+    else Color.CURRENT
+);
 
 # Zero line
 plot zero =  0;
