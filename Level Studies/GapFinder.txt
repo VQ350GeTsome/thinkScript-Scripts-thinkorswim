@@ -1,12 +1,5 @@
 input use_high_low = yes; #Hint use_high_low: If yes, the study will use the high's and lows to find gaps. Otherwise it will use open and close. I recommend using high & low, otherwise the study will be too noisy.
-input tolerance_percent = 0; #Hint tolerance_percent: If the gap is less than this, it won't be shown.
 
-input close_gap_when_filled = yes; #Hint close_gap_when_filled: Gaps will go away once filled the price goes above it, unless otherwise stated. If (require close above gap) is (yes) then Gaps will go away once the price closes above it. If (gap fill on touch) is (yes) then Gaps will go away when the price just touches it. Don't turn both on.
-input require_close_above_gap = no; #Hint require_close_above_gap: Gaps will only close once the price closes above it.
-input gap_fill_on_touch = no; #Hint gap_fill_on_touch: Considers a gap filled when the price just touches it. Other wise gaps will only be filled when the price goes above it.
-
-
-def tolPer = tolerance_percent / 100.0;
 def l = 
     if !use_high_low then
         if close > open then
@@ -29,12 +22,22 @@ def h =
 # GapUps ...
 def gapUp = l > h[1];
 
-def gapUpHigh = if gapUp then l else gapUpHigh[1];
+def gapUpHigh = 
+    if gapUp then 
+        l
+    else
+        gapUpHigh[1]
+;
 plot gapUpHighP = gapUpHigh;
 gapUpHighP.setPaintingStrategy(PaintingStrategy.HORIZONTAL);
 gapUpHighP.setDefaultColor(Color.GREEN);
 
-def gapUpLow = if gapUp then h[1] else gapUpLow[1];
+def gapUpLow = 
+    if gapUp then 
+        h[1] 
+    else 
+        gapUpLow[1]
+;
 plot gapUpLowP = gapUpLow;
 gapUpLowP.setPaintingStrategy(PaintingStrategy.HORIZONTAL);
 gapUpLowP.setDefaultColor(Color.GREEN);
