@@ -1,0 +1,19 @@
+declare lower;
+
+# Get highest traded price
+def highest = if high > highest[1] then high else highest[1];
+def dd = 100*(close / highest - 1);
+
+input negate = no;
+def n = if negate then -1 else 1;
+plot drawdown = n*dd;
+
+# Levels
+input show_consensous_levels = no;
+plot pullback = if show_consensous_levels then -n*2.5 else Double.NaN;
+plot bearmarket = if show_consensous_levels then -n*10 else Double.NaN;
+plot deadBearmarket = if show_consensous_levels then -n*20 else Double.NaN;
+
+# Zero line
+plot zero =  0;
+zero.SetDefaultColor(Color.BLACK);

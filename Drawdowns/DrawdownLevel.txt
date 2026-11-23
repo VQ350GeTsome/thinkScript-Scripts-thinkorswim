@@ -1,0 +1,45 @@
+# Get highest traded price
+def highest = if high > highest[1] then high else highest[1];
+
+input show_high = yes;
+plot highestHigh = if show_high then highest else Double.NaN; 
+highestHigh.setDefaultColor(Color.RED);
+highestHigh.setStyle(curve.MEDIUM_DASH);
+
+input show_level = yes;
+input draw_down_level = 30.0;
+def ddpct = if 0 > draw_down_level and show_level then Double.NaN else 1 - (draw_down_level / 100);
+plot drawDownPercent = highest * ddpct;
+drawDownPercent.setDefaultColor(Color.MAGENTA);
+
+def dd = close / highest - 1;
+
+input current_drawdown_label = yes;
+addLabel(current_drawdown_label, "Current Drawdown: " + 100 * round(dd, 3) + "%", Color.BLACK, Location.TOP_LEFT);
+
+input show_consensous_levels = no;
+plot pullback = if show_consensous_levels then highest * (1 - 0.025) else Double.NaN;
+plot bearmarket = if show_consensous_levels then highest * (1 - 0.1) else Double.NaN;
+plot deadBearmarket = if show_consensous_levels then highest * (1 - 0.2) else Double.NaN;
+plot dead = if show_consensous_levels then highest * (1 - 0.95) else Double.NaN;
+
+# ATHs, pullback, bearmarket, deep bearmarket, dead
+input consensous_label = yes;
+addLabel(
+    consensous_label, 
+    "Currently In: " + 
+        (
+            if dd > -0.025 then
+                "ATHs" 
+            else if dd > -0.10 then
+                "Pullback"
+            else if dd > -0.20 then
+                "Bear Market"
+            else if dd > -0.95 then
+                "Deep Bear Market"
+            else 
+                "Dead ..."
+        ), 
+    Color.BLACK, 
+    Location.TOP_LEFT
+);
