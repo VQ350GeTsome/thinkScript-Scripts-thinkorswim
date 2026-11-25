@@ -1,0 +1,33 @@
+#Hint: Open Close Convegence Divergence 
+
+declare lower;
+
+input length = 5; #Hint length: Length for the two moving averages.
+input type = averageType.SIMPLE; #Hint type: Type of moving average to use for both.
+
+def OMA = MovingAverage(type,  open, length);
+def CMA = MovingAverage(type, close, length);
+plot tilt = (CMA / OMA) - 1;
+
+input signal_length = 9;
+input signal_type = averageType.EXPONENTIAL;
+
+plot signal = movingAverage(signal_type, tilt, signal_length);
+
+plot hist = tilt - signal;
+hist.setPaintingStrategy(PaintingStrategy.HISTOGRAM);
+hist.assignValueColor(
+    if hist > 0 then
+        if hist > hist[1] then
+            Color.GREEN
+        else Color.DARK_GREEN
+    else
+        if hist > hist[1] then
+            Color.DARK_RED
+        else     
+            Color.RED
+);
+
+# Zero line
+plot zero =  0;
+zero.SetDefaultColor(Color.BLACK);

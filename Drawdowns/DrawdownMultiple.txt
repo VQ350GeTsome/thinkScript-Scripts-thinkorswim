@@ -1,0 +1,16 @@
+declare lower;
+
+# Get highest traded price
+def highest = if high > highest[1] then high else highest[1];
+def dd = (close / highest);
+
+input negate = no;
+def n = if negate then -1 else 1;
+input log_scale = yes;
+def drawdown = n*dd;
+def multi = 1 / drawdown - 1;
+plot multiple = if log_scale then log(multi + 1) else multi;
+
+# Zero line
+plot zero = 0;
+zero.SetDefaultColor(Color.BLACK);
